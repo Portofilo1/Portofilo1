@@ -1,327 +1,86 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Тестовое казино</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .user-info h3 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .user-info p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .balance {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            color: white;
-            margin-bottom: 20px;
-        }
-        
-        .balance-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-        
-        .balance-amount {
-            font-size: 48px;
-            font-weight: bold;
-        }
-        
-        .balance-amount span {
-            font-size: 24px;
-            opacity: 0.8;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            color: #333;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .methods {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .method {
-            background: #f5f5f5;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .method.selected {
-            background: #667eea;
-            color: white;
-            border-color: #764ba2;
-        }
-        
-        .method span {
-            display: block;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .button:active {
-            transform: scale(0.98);
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <div class="header">
-                <div class="avatar" id="avatar">?</div>
-                <div class="user-info">
-                    <h3 id="userName">Загрузка...</h3>
-                    <p id="userId"></p>
-                </div>
-            </div>
-            
-            <div class="balance">
-                <div class="balance-label">Твой баланс</div>
-                <div class="balance-amount" id="balance">1000 <span>₽</span></div>
-            </div>
-            
-            <div id="alert" class="alert"></div>
-            
-            <h3 style="margin-bottom: 15px; color: #333;">Вывод средств</h3>
-            
-            <div class="methods">
-                <div class="method selected" onclick="selectMethod('card')">
-                    <span>💳</span>
-                    Карта
-                </div>
-                <div class="method" onclick="selectMethod('btc')">
-                    <span>₿</span>
-                    Bitcoin
-                </div>
-                <div class="method" onclick="selectMethod('usdt')">
-                    <span>💎</span>
-                    USDT
-                </div>
-                <div class="method" onclick="selectMethod('eth')">
-                    <span>Ξ</span>
-                    ETH
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Сумма (₽)</label>
-                <input type="number" id="amount" placeholder="Введите сумму" min="100" step="100" value="1000">
-            </div>
-            
-            <div class="form-group" id="cardField">
-                <label>Номер карты</label>
-                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" value="4111111111111111">
-            </div>
-            
-            <div class="form-group" id="cryptoField" style="display: none;">
-                <label>Адрес кошелька</label>
-                <input type="text" id="walletAddress" placeholder="Введите адрес" value="0x742d35Cc6634C0532925a3b844Bc454e4438f44e">
-            </div>
-            
-            <button class="button" onclick="withdraw()">💰 Запросить выплату</button>
-            
-            <p style="text-align: center; margin-top: 15px; color: #999; font-size: 12px;">
-                Тестовый режим • Баланс 1000 ₽
-            </p>
-        </div>
-    </div>
+import logging
+import sqlite3
+import json
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+TOKEN = '8703016461:AAEhYXg6d_F4MWsXotnEJ2HSil3GRCcG33c'
+WEB_APP_URL = 'https://portofilo1.github.io/Portofilo1/'
+
+logging.basicConfig(level=logging.INFO)
+
+def init_db():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users 
+                 (user_id INTEGER PRIMARY KEY, name TEXT, balance INTEGER DEFAULT 1000)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS withdraws 
+                 (id INTEGER PRIMARY KEY, user_id INTEGER, amount INTEGER)''')
+    conn.commit()
+    conn.close()
+
+def get_user(user_id):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+    return user
+
+def create_user(user_id, name):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("INSERT OR IGNORE INTO users (user_id, name) VALUES (?, ?)", (user_id, name))
+    conn.commit()
+    conn.close()
+
+def update_balance(user_id, amount):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET balance = balance - ? WHERE user_id = ?", (amount, user_id))
+    conn.commit()
+    conn.close()
+    c.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
+    new = c.fetchone()[0]
+    conn.close()
+    return new
+
+def add_withdraw(user_id, amount):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO withdraws (user_id, amount) VALUES (?, ?)", (user_id, amount))
+    conn.commit()
+    conn.close()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    create_user(user.id, user.first_name)
+    balance = get_user(user.id)[2]
+    
+    keyboard = [[InlineKeyboardButton("🎮 Открыть мини-апп", web_app=WebAppInfo(url=WEB_APP_URL))]]
+    
+    await update.message.reply_text(
+        f"👋 {user.first_name}\n💰 Баланс: {balance} ₽",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = json.loads(update.effective_message.web_app_data.data)
+    user_id = update.effective_user.id
+    
+    if data['action'] == 'withdraw':
+        amount = data['amount']
+        new_balance = update_balance(user_id, amount)
+        add_withdraw(user_id, amount)
         
-        const user = tg.initDataUnsafe?.user;
-        let selectedMethod = 'card';
-        
-        // Показываем данные пользователя
-        if (user) {
-            document.getElementById('userName').textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-            document.getElementById('userId').textContent = 'ID: ' + user.id;
-            document.getElementById('avatar').textContent = user.first_name.charAt(0).toUpperCase();
-        }
-        
-        function selectMethod(method) {
-            selectedMethod = method;
-            
-            document.querySelectorAll('.method').forEach(el => {
-                el.classList.remove('selected');
-            });
-            event.target.closest('.method').classList.add('selected');
-            
-            if (method === 'card') {
-                document.getElementById('cardField').style.display = 'block';
-                document.getElementById('cryptoField').style.display = 'none';
-            } else {
-                document.getElementById('cardField').style.display = 'none';
-                document.getElementById('cryptoField').style.display = 'block';
-            }
-        }
-        
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = 'alert ' + type;
-            
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
-        }
-        
-        function withdraw() {
-            const amount = parseInt(document.getElementById('amount').value);
-            
-            if (!amount || amount < 100) {
-                showAlert('Минимум 100 ₽', 'error');
-                return;
-            }
-            
-            if (amount > 1000) {
-                showAlert('Недостаточно средств! Максимум 1000 ₽', 'error');
-                return;
-            }
-            
-            let details = '';
-            if (selectedMethod === 'card') {
-                details = document.getElementById('cardNumber').value;
-                if (!details || details.length < 16) {
-                    showAlert('Введите номер карты', 'error');
-                    return;
-                }
-            } else {
-                details = document.getElementById('walletAddress').value;
-                if (!details) {
-                    showAlert('Введите адрес кошелька', 'error');
-                    return;
-                }
-            }
-            
-            const data = {
-                action: 'withdraw',
-                amount: amount,
-                method: selectedMethod,
-                details: details
-            };
-            
-            showAlert('Запрос отправлен! Проверь бота.', 'success');
-            tg.sendData(JSON.stringify(data));
-            
-            setTimeout(() => {
-                tg.close();
-            }, 2000);
-        }
-    </script>
-</body>
-</html>
+        await update.message.reply_text(f"✅ Вывод {amount} ₽\n💰 Новый баланс: {new_balance} ₽")
+
+def main():
+    init_db()
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data))
+    app.run_polling()
+
+if __name__ == '__main__':
+    main()
