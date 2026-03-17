@@ -1,86 +1,42 @@
-import logging
-import sqlite3
-import json
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
+        .card { background: white; border-radius: 15px; padding: 20px; max-width: 300px; margin: 0 auto; }
+        .name { font-size: 24px; margin: 10px 0; }
+        .balance { font-size: 32px; color: #28a745; margin: 20px 0; }
+        input { padding: 10px; width: 200px; margin: 10px; }
+        button { background: #0088cc; color: white; border: none; padding: 15px 30px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="name" id="name">Загрузка...</div>
+        <div class="balance" id="balance">1000 ₽</div>
+        <input type="number" id="amount" placeholder="Сумма" value="100">
+        <button onclick="withdraw()">Вывести</button>
+    </div>
 
-TOKEN = '8703016461:AAEhYXg6d_F4MWsXotnEJ2HSil3GRCcG33c'
-WEB_APP_URL = 'https://portofilo1.github.io/Portofilo1/'
-
-logging.basicConfig(level=logging.INFO)
-
-def init_db():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (user_id INTEGER PRIMARY KEY, name TEXT, balance INTEGER DEFAULT 1000)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS withdraws 
-                 (id INTEGER PRIMARY KEY, user_id INTEGER, amount INTEGER)''')
-    conn.commit()
-    conn.close()
-
-def get_user(user_id):
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-    user = c.fetchone()
-    conn.close()
-    return user
-
-def create_user(user_id, name):
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute("INSERT OR IGNORE INTO users (user_id, name) VALUES (?, ?)", (user_id, name))
-    conn.commit()
-    conn.close()
-
-def update_balance(user_id, amount):
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute("UPDATE users SET balance = balance - ? WHERE user_id = ?", (amount, user_id))
-    conn.commit()
-    conn.close()
-    c.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
-    new = c.fetchone()[0]
-    conn.close()
-    return new
-
-def add_withdraw(user_id, amount):
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO withdraws (user_id, amount) VALUES (?, ?)", (user_id, amount))
-    conn.commit()
-    conn.close()
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    create_user(user.id, user.first_name)
-    balance = get_user(user.id)[2]
-    
-    keyboard = [[InlineKeyboardButton("🎮 Открыть мини-апп", web_app=WebAppInfo(url=WEB_APP_URL))]]
-    
-    await update.message.reply_text(
-        f"👋 {user.first_name}\n💰 Баланс: {balance} ₽",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = json.loads(update.effective_message.web_app_data.data)
-    user_id = update.effective_user.id
-    
-    if data['action'] == 'withdraw':
-        amount = data['amount']
-        new_balance = update_balance(user_id, amount)
-        add_withdraw(user_id, amount)
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
         
-        await update.message.reply_text(f"✅ Вывод {amount} ₽\n💰 Новый баланс: {new_balance} ₽")
-
-def main():
-    init_db()
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data))
-    app.run_polling()
-
-if __name__ == '__main__':
-    main()
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('name').textContent = user.first_name;
+        }
+        
+        function withdraw() {
+            const amount = parseInt(document.getElementById('amount').value);
+            tg.sendData(JSON.stringify({
+                action: 'withdraw',
+                amount: amount
+            }));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
