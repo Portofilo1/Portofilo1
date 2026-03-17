@@ -1,42 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Тест</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АХИПНЫЙ - SIM и eSIM</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
-        .card { background: white; border-radius: 15px; padding: 20px; max-width: 300px; margin: 0 auto; }
-        .name { font-size: 24px; margin: 10px 0; }
-        .balance { font-size: 32px; color: #28a745; margin: 20px 0; }
-        input { padding: 10px; width: 200px; margin: 10px; }
-        button { background: #0088cc; color: white; border: none; padding: 15px 30px; border-radius: 10px; }
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            border-bottom: 2px solid #007aff;
+            padding-bottom: 10px;
+        }
+        .price-list {
+            list-style: none;
+            padding: 0;
+        }
+        .price-list li {
+            background: white;
+            margin-bottom: 8px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .operator {
+            font-weight: bold;
+            color: #555;
+        }
+        .price {
+            background-color: #007aff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="name" id="name">Загрузка...</div>
-        <div class="balance" id="balance">1000 ₽</div>
-        <input type="number" id="amount" placeholder="Сумма" value="100">
-        <button onclick="withdraw()">Вывести</button>
-    </div>
+    <h1>АХИПНЫЙ</h1>
+    <p class="subtitle" style="text-align: center; color: #666; margin-top: -10px;">Подпись SIM / eSIM</p>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('name').textContent = user.first_name;
-        }
-        
-        function withdraw() {
-            const amount = parseInt(document.getElementById('amount').value);
-            tg.sendData(JSON.stringify({
-                action: 'withdraw',
-                amount: amount
-            }));
-            tg.close();
-        }
-    </script>
+    <ul class="price-list">
+        <li>
+            <span class="operator">МТС (SIM/eSIM)</span>
+            <span class="price">$5.5</span>
+        </li>
+        <li>
+            <span class="operator">Билайн (SIM/eSIM)</span>
+            <span class="price">$3.0</span>
+        </li>
+        <li>
+            <span class="operator">T2 (SIM/eSIM)</span>
+            <span class="price">$2.5</span>
+        </li>
+        <li>
+            <span class="operator">СберМобайл (SIM/eSIM)</span>
+            <span class="price">$2.5</span>
+        </li>
+        <li>
+            <span class="operator">Т.Мобайл (SIM)</span>
+            <span class="price">$2.2</span>
+        </li>
+        <!-- Новая строка с Мегафоном -->
+        <li>
+            <span class="operator">Мегафон (SIM/eSIM)</span>
+            <span class="price">$4.0</span>
+        </li>
+    </ul>
+
+    <footer style="text-align: center; margin-top: 30px; color: #888; font-size: 0.8em;">
+        <!-- Здесь можно добавить контакты или информацию -->
+    </footer>
 </body>
 </html>
